@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
@@ -8,11 +8,12 @@ import "easymde/dist/easymde.min.css";
 import styles from "./AddPost.module.scss";
 import { useSelector } from "react-redux";
 import { selectIsAuth } from "../../components/redux/authSlice";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import axios from "../../axios";
 
 export const AddPost = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const isAuth = useSelector(selectIsAuth);
   const [imageUrl, setImageUrl] = React.useState("");
@@ -20,6 +21,8 @@ export const AddPost = () => {
   const [title, setTitle] = React.useState("");
   const [tags, setTags] = React.useState("");
   const [loading, setLoading] = useState("");
+
+  const isEditing = Boolean(id);
 
   const uploadFileRef = useRef(null);
 
@@ -39,6 +42,23 @@ export const AddPost = () => {
   const onClickRemoveImage = () => {
     setImageUrl("");
   };
+
+  useEffect(() => {
+    if (id) {
+      axios
+        .get(`/posts/${id}`)
+        .then(({ data }) => {
+          setTitle(data.title);
+          setText(data.text);
+          setImageUrl(data.imageUrl);
+          setTags(data.tags.join(","));
+        })
+        .catch((err) => {
+          console.warn(err);
+          alert("Failed update post ");
+        });
+    }
+  }, []);
 
   const onChange = React.useCallback((value) => {
     setText(value);
@@ -74,9 +94,13 @@ export const AddPost = () => {
         imageUrl,
       };
 
-      const { data } = await axios.post("/posts", fields);
-      const id = data._id;
-      navigate(`/posts/${id}`);
+      const { data } = isEditing
+        ? await axios.patch(`/posts/${id}`, fields)
+        : await axios.post("/posts", fields);
+
+      const _id = isEditing ? id : data._id;
+
+      navigate(`/posts/${_id}`);
     } catch (err) {
       console.warn(err);
       alert("Failed create post ");
@@ -140,7 +164,7 @@ export const AddPost = () => {
       />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Post
+          {isEditing ? "Save" : "Create post"}
         </Button>
         <a href="/">
           <Button size="large">Cancel</Button>
