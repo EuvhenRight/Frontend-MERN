@@ -1,57 +1,79 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "../../axios";
 
-export const fetchPosts = createAsyncThunk("posts/fetchPosts", async () => {
-  const { data } = await axios.get("/posts");
+export const fetchAuth = createAsyncThunk("auth/fetchAuth", async (params) => {
+  const { data } = await axios.post("/auth/login", params);
   return data;
 });
 
-export const fetchTags = createAsyncThunk("posts/fetchTags", async () => {
-  const { data } = await axios.get("/posts/tags");
+export const fetchAuthMe = createAsyncThunk("auth/fetchAuthMe", async () => {
+  const { data } = await axios.get("/auth/me");
   return data;
 });
+
+export const fetchRegister = createAsyncThunk(
+  "auth/fetchRegister",
+  async (params) => {
+    const { data } = await axios.post("/auth/register", params);
+    return data;
+  }
+);
 
 const initialState = {
-  posts: {
-    items: [],
-    status: "loading",
-  },
-  tags: {
-    items: [],
-    status: "loading",
-  },
+  data: null,
+  status: "loading",
 };
 
-const postsSlice = createSlice({
-  name: "posts",
+const authSlice = createSlice({
+  name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      state.data = null;
+    },
+  },
   extraReducers: {
-    [fetchPosts.pending]: (state) => {
-      state.posts.items = [];
-      state.posts.status = "loading";
+    [fetchAuth.pending]: (state) => {
+      state.status = "loading";
+      state.data = null;
     },
-    [fetchPosts.fulfilled]: (state, action) => {
-      state.posts.items = action.payload;
-      state.posts.status = "loaded";
+    [fetchAuth.fulfilled]: (state, action) => {
+      state.status = "loaded";
+      state.data = action.payload;
     },
-    [fetchPosts.rejected]: (state) => {
-      state.posts.items = [];
-      state.posts.status = "error";
+    [fetchAuth.rejected]: (state) => {
+      state.status = "error";
+      state.data = null;
     },
-    [fetchTags.pending]: (state) => {
-      state.tags.items = [];
-      state.tags.status = "loading";
+    [fetchAuthMe.pending]: (state) => {
+      state.status = "loading";
+      state.data = null;
     },
-    [fetchTags.fulfilled]: (state, action) => {
-      state.tags.items = action.payload;
-      state.tags.status = "loaded";
+    [fetchAuthMe.fulfilled]: (state, action) => {
+      state.status = "loaded";
+      state.data = action.payload;
     },
-    [fetchTags.rejected]: (state) => {
-      state.tags.items = [];
-      state.tags.status = "error";
+    [fetchAuthMe.rejected]: (state) => {
+      state.status = "error";
+      state.data = null;
+    },
+    [fetchRegister.pending]: (state) => {
+      state.status = "loading";
+      state.data = null;
+    },
+    [fetchRegister.fulfilled]: (state, action) => {
+      state.status = "loaded";
+      state.data = action.payload;
+    },
+    [fetchRegister.rejected]: (state) => {
+      state.status = "error";
+      state.data = null;
     },
   },
 });
 
-export const postsReducer = postsSlice.reducer;
+export const selectIsAuth = (state) => Boolean(state.auth.data);
+
+export const authReducer = authSlice.reducer;
+
+export const { logout } = authSlice.actions;
