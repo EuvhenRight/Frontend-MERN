@@ -21,7 +21,7 @@ export const FullPost = () => {
       })
       .catch((err) => {
         console.warn(err);
-        alert("Помилка загрузки статті");
+        alert("post loading error");
       });
   }, []);
 
@@ -36,7 +36,7 @@ export const FullPost = () => {
         title={data.title}
         imageUrl={
           data.imageUrl
-            ? `${process.env.REACT_APP_API_URL}${data.imageUrl}`
+            ? `${process.env.REACT_APP_API_URL}${data.imageUrl}` // TODO need read this line
             : ""
         }
         //imageUrl="https://res.cloudinary.com/practicaldev/image/fetch/s--UnAfrEG8--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/icohm5g0axh9wjmu4oc3.png"
@@ -56,7 +56,7 @@ export const FullPost = () => {
               fullName: "User_1",
               avatarUrl: "https://mui.com/static/images/avatar/1.jpg",
             },
-            text: "This is a test comment",
+            text: "This is a test`s comment",
           },
           {
             user: {
